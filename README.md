@@ -3,14 +3,14 @@ AutoEPD is a package for calculating the Environmental Product Declaration(EPD).
 
 
 # Result Figures
-- some Result examples
+Some result figures:
 ![image](https://github.com/Jakkwj/autoepd/blob/master/results/EPD-GWP.jpg)
 ![image](https://github.com/Jakkwj/autoepd/blob/master/results/sensitivity.png)
 
 # Example
-- a simple example can be found in autoepd/tests/main.py
+A simple example can be found in autoepd/tests/main.py
 
-```{python}
+```
 import epd
 
 epd = epd.epd()
@@ -26,5 +26,4 @@ epd.initialise()
 epd.get_epd(epd.product_num, epd.table_res_lable) # get EPD results
 epd.epd_resultsave() # get results xlsx and csv format
 epd.get_sensitivity() # sensitivity results
-
 ```
