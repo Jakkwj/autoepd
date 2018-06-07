@@ -5,14 +5,14 @@
 # File Name: setup.py
 # Author: JunWang
 # Mail: shutupwj@163.com
-# Created Time:  2018-6-7 15:17:34
+# Created Time:  2018-6-7 22:08:34
 #############################################
 
 from setuptools import setup, find_packages
 
 setup(
     name = "AutoEPD",
-    version = "0.0.1",
+    version = "0.0.2",
     keywords = ("pip", "EPD","Environmental Product Declaration","sensitivity analysis","uncertainty analysis"),
     description = "A package for calculating the EPD",
     long_description = "A package for calculating the Environmental Product Declaration",
