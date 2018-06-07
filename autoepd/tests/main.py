@@ -2,7 +2,8 @@
 
 import sys
 sys.path.append("..")
-import epd
+from autoepd 
+
 
 epd = epd.epd()
 epd.file_input = 'input_epd_exam.xlsx'

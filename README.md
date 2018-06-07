@@ -11,7 +11,7 @@ Some result figures:
 A simple example can be found in autoepd/tests/main.py
 
 ```
-import epd
+from autoepd import epd
 
 epd = epd.epd()
 epd.file_input = 'input_epd_exam.xlsx'
