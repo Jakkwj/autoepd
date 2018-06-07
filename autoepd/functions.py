@@ -5,7 +5,6 @@ from matplotlib.font_manager import *
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import pyautogui
 import xlrd
 import xlwt
 import sys
