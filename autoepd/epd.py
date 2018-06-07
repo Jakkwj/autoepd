@@ -14,7 +14,6 @@ from pylab import *
 import copy
 
 class epd():
-
 	def __init__(self):
 		self.file_input = 'file_input.xlsx'
 		self.file_result = 'result.xlsx'
@@ -37,11 +36,6 @@ class epd():
 		self.table_chara_lable = self.get_table_chara_lable(self.file_input, self.list_chara_head_lable)
 		self.sens_table_res_lable = self.get_sens_table_res_lable(self.file_input, self.list_stage_head_lable, self.table_res_lable, self.product_num, self.delta_x)
 
-		# self.table_res_lable = pd.read_excel(self.file_input, sheet_name=self.sheet_stage.name, usecols=range(0,self.sheet_stage.ncols), skiprows=[0,2], skipfooter=0, index_col=[0], header=0)
-		# self.table_chara_lable = pd.read_excel(self.file_input, sheet_name=self.sheet_chara.name, usecols=range(0,self.sheet_chara.ncols), skiprows=[0,2], skipfooter=0, index_col=[0], header=0)
-
-
-
 	def matmul(self, ty, tx, tz):#矩阵乘法
 		tablex = np.mat(tx.ix[tz,tx.columns])
 		tabley = np.mat(ty.iloc[0])
@@ -59,26 +53,6 @@ class epd():
 		table = pd.read_excel(file_input, sheet_name=sheet.name, usecols=range(0,sheet.ncols), skiprows=[0,2], skipfooter=0, index_col=[0], header=0)
 		return table
 
-
-	# def parse_table(self, file_input, sheetindex):#读取excel表格，并转化为pd.dataframe
-		# workbook = xlrd.open_workbook(file_input)
-		# sheet = workbook.sheet_by_index(sheetindex)
-
-	# def parse_table(self, sheetindex):#读取excel表格，并转化为pd.dataframe
-	# 	sheet = self.workbook.sheet_by_index(sheetindex)
-	# 	table = pd.read_excel(file_input, sheet_name=sheet.name, usecols=range(0,sheet.ncols), skiprows=[0,2], skipfooter=0, index_col=[0], header=0)
-	# 	return table
-
-
-	# def get_table_head(self, file_input, sheetindex):#得到表头，为得到stage和chara做准备
-	# def get_table_head(self, sheetindex):#得到表头，为得到stage和chara做准备
-	# 	# workbook = xlrd.open_workbook(file_input)
-	# 	sheet = self.workbook.sheet_by_index(sheetindex) #资源采集清单系数（每kg）数据库提取参数
-	# 	table_row = pd.read_excel(file_input, sheet_name=sheet.name).shape[0]
-	# 	return pd.read_excel(file_input, sheet_name=sheet.name, usecols=range(0,sheet.ncols),  skipfooter=table_row-2, index_col=[0], header=0)
-
-		# self.sheet_stage = self.workbook.sheet_by_index(sheetindex)
-
 	def get_Head_numlist(self, table):#得到stage的计数列表
 		counter_Stage_col = 0 
 		counter_stage_row = 1
@@ -93,16 +67,10 @@ class epd():
 				Stage1.append(table.ix[1,col])
 		stage_collist.append(counter_Stage_col)
 		stage_row = counter_stage_row-1
-
 		stage_numlist = []
 		for i in range(len(stage_collist)):
 			stage_numlist.append(self.fact(i,stage_collist))
 		return stage_row, stage_numlist
-
-
-
-
-
 
 	def get_list_head(self, table_head_stage, table_head_chara, stage_row, stage_numlist, chara_row, chara_numlist):	# 求得表头计数列表
 		list_stage_head = []
@@ -118,7 +86,6 @@ class epd():
 			table_head_chara.ix[0,range(chara_numlist[row],chara_numlist[row+1])] = table_head_chara.ix[0,range(chara_numlist[row],chara_numlist[row+1])] + "_"+table_head_chara.columns[chara_numlist[row]]
 			list_chara_head_lable.append(table_head_chara.ix[0,range(chara_numlist[row],chara_numlist[row+1])])
 		return list_stage_head, list_stage_head_lable, list_chara_head, list_chara_head_lable
-
 
 	def get_table_res_lable(self, file_input, list_stage_head_lable):
 		list_stage_head_inone = []
@@ -138,7 +105,6 @@ class epd():
 		table_chara_lable.columns = list_chara_head_inone
 		return table_chara_lable
 
-
 	def csv_export(self, csvfile_name, fieldnames, data):
 		with open(csvfile_name, 'w', newline='') as csvfile: #Ubuntu
 		# with open(csvfile_name, 'w', encoding='UTF8', newline='') as csvfile: #windows
@@ -146,8 +112,13 @@ class epd():
 			writer.writeheader()
 			writer.writerows(data)
 
-	# def get_csv(self, file_excel, file_csv, unit_field):
-	def get_epd_csv(self):
+	def epd_resultsave(self):
+		
+		writer = pd.ExcelWriter(self.file_result)
+		for ind, tab in enumerate(self.table_result):
+			tab.to_excel(writer,self.product_name[ind])
+		writer.save()
+
 		field = ['product', 'stage', 'chara', 'result', 'unit']
 		get_dict = collections.defaultdict()
 		get_list = []
@@ -162,20 +133,15 @@ class epd():
 					counter += 1
 		self.csv_export(self.file_result_csv, field, get_list)
 
-
-
-
 	def get_sens_table_res_lable(self, file_input, list_stage_head_lable, table_res_lable, product_num, delta_x):#求敏感度变化delta_x的数列
 		sens_table_res_lable = []
 		trl_raw = copy.deepcopy(table_res_lable)
-
 		for ind, tab in enumerate(table_res_lable.iloc[-1]):
 			trl_copy = copy.deepcopy(table_res_lable.iloc[-1])
 			trl_copy[ind]=tab*(1+delta_x) #原始数据增加10%
 			trl_raw.iloc[-1] = trl_copy
 			trl_raw_copy = copy.deepcopy(trl_raw)
 			sens_table_res_lable.append(trl_raw_copy)
-
 		return sens_table_res_lable
 
 	def senstivity(self, Mrow, Mnew, dx):# 求敏感度
@@ -208,91 +174,30 @@ class epd():
 		plt.show()
 		plt.close()
 
-	# def get_epd(self, file_input, file_result, product_num, product_name, unit_field): # 求特制化结果
-		# # workbook = xlrd.open_workbook(file_input)
-		# # table_head_stage = get_table_head(file_input, 0)
-		# # table_head_chara = get_table_head(file_input, 1)
-		# # stage_row, stage_numlist = get_Head_numlist(table_head_stage)
-		# # chara_row, chara_numlist = get_Head_numlist(table_head_chara)
-		# # list_stage_head, list_stage_head_lable, list_chara_head, list_chara_head_lable = get_list_head(table_head_stage, table_head_chara, stage_row, stage_numlist, chara_row, chara_numlist)
-		# # table_res_lable = get_table_res_lable(file_input, list_stage_head_lable)
-		# # table_chara_lable = get_table_chara_lable(file_input, list_chara_head_lable)
-
-		# # table_res_lable = table_res_lable
-		# table_total = []
-		# table_result = []
-		# table_mul = []
-
-		# # 求实际使用物质转换矩阵table_mul-----------------------------------------
-		# for num in range(product_num): 
-		# 	table_mul.append(table_res_lable*table_res_lable.iloc[-(product_num-num)])
-		# 	# table_mul.append(table_res_lable*table_res_lable.iloc[-(product_num*2-2*num-1)])#如果是t和m2间隔（-9,-7,-5,-3,-1）
-		# 	table_mul[num].drop(table_mul[num].index[range(-1,-product_num-1,-1)],inplace=True)
-
-		# # 求各阶段之和矩阵table_total-----------------------------------------
-		# for num in range(product_num):
-		# 	table_total.append(pd.DataFrame())
-
-		# for num in range(product_num):
-		# 	counter = 0
-		# 	for col in table_head_stage.columns:
-		# 		if "Unnamed" not in col:
-		# 			table_total[num][col] = table_mul[num][list_stage_head_lable[counter]].sum(axis=1)
-		# 			counter += 1
-		
-		# # 求特制化结果矩阵table_result-----------------------------------------
-		# for num in range(product_num):
-		# 	get_result_t = []
-		# 	get_result_m2 = []
-		# 	table_result_index = []
-		# 	counter = 0
-
-		# 	for col in table_head_chara.columns:
-		# 		if "Unnamed" not in col:
-		# 			get_result_t.append(list(pd.DataFrame(self.matmul(table_chara_lable[list_chara_head_lable[counter]], table_total[num], list_chara_head[counter])).iloc[0]))
-		# 			table_result_index.append(col) #求特征化index
-		# 			counter += 1
-		# 	table_result.append(pd.DataFrame(get_result_t, index=table_result_index))
-		# 	table_result[num].columns = table_total[num].columns
-
-		# writer = pd.ExcelWriter(file_result)
-		# for ind, tab in enumerate(table_result):
-		# 	tab.to_excel(writer,product_name[ind])
-		# writer.save()
-
-		# return table_mul, table_total, table_result
-
-
-	def get_epd(self): # 求特制化结果
-		# table_res_lable = table_res_lable
+	def get_epd(self, product_num, table_res_lable): # 求特制化结果
 		self.table_total = []
 		self.table_result = []
 		self.table_mul = []
-
 		# 求实际使用物质转换矩阵table_mul-----------------------------------------
-		for num in range(self.product_num): 
-			self.table_mul.append(self.table_res_lable*self.table_res_lable.iloc[-(self.product_num-num)])
-			# self.table_mul.append(table_res_lable*table_res_lable.iloc[-(self.product_num*2-2*num-1)])#如果是t和m2间隔（-9,-7,-5,-3,-1）
-			self.table_mul[num].drop(self.table_mul[num].index[range(-1,-self.product_num-1,-1)],inplace=True)
-
+		for num in range(product_num): 
+			self.table_mul.append(table_res_lable*table_res_lable.iloc[-(product_num-num)])
+			# self.table_mul.append(table_res_lable*table_res_lable.iloc[-(product_num*2-2*num-1)])#如果是t和m2间隔（-9,-7,-5,-3,-1）
+			self.table_mul[num].drop(self.table_mul[num].index[range(-1,-product_num-1,-1)],inplace=True)
 		# 求各阶段之和矩阵table_total-----------------------------------------
-		for num in range(self.product_num):
+		for num in range(product_num):
 			self.table_total.append(pd.DataFrame())
-
-		for num in range(self.product_num):
+		for num in range(product_num):
 			counter = 0
 			for col in self.table_head_stage.columns:
 				if "Unnamed" not in col:
 					self.table_total[num][col] = self.table_mul[num][self.list_stage_head_lable[counter]].sum(axis=1)
 					counter += 1
-		
 		# 求特制化结果矩阵table_result-----------------------------------------
-		for num in range(self.product_num):
+		for num in range(product_num):
 			get_result_t = []
 			get_result_m2 = []
 			table_result_index = []
 			counter = 0
-
 			for col in self.table_head_chara.columns:
 				if "Unnamed" not in col:
 					get_result_t.append(list(pd.DataFrame(self.matmul(self.table_chara_lable[self.list_chara_head_lable[counter]], self.table_total[num], self.list_chara_head[counter])).iloc[0]))
@@ -300,115 +205,33 @@ class epd():
 					counter += 1
 			self.table_result.append(pd.DataFrame(get_result_t, index=table_result_index))
 			self.table_result[num].columns = self.table_total[num].columns
-
-		writer = pd.ExcelWriter(self.file_result)
-		for ind, tab in enumerate(self.table_result):
-			tab.to_excel(writer,self.product_name[ind])
-		writer.save()
-
 		return self.table_mul, self.table_total, self.table_result
 
-
-
-
-
-
-
-
-
-
-
-	def get_sensitivity(self, file_input, file_result, product_num, product_name, unit_field, delta_x):
-		# workbook = xlrd.open_workbook(file_input)
-		# table_head_stage = get_table_head(file_input, 0)
-		# table_head_chara = get_table_head(file_input, 1)
-		# stage_row, stage_numlist = get_Head_numlist(table_head_stage)
-		# chara_row, chara_numlist = get_Head_numlist(table_head_chara)
-		# list_stage_head, list_stage_head_lable, list_chara_head, list_chara_head_lable = get_list_head(table_head_stage, table_head_chara, stage_row, stage_numlist, chara_row, chara_numlist)
-		# table_res_lable = get_table_res_lable(file_input, list_stage_head_lable)
-		# table_chara_lable = get_table_chara_lable(file_input, list_chara_head_lable)
-		# sens_table_res_lable = get_sens_table_res_lable(file_input, list_stage_head_lable, table_res_lable, product_num, delta_x)
-
-		# #构建一个最后一行为企业数据input的df，即product_num=1时的table_res_lable----------------
-		# trl_copy = copy.deepcopy(table_res_lable)
-		# trl_copy.drop(trl_copy.index[range(-1,-product_num,-1)],inplace=True)
-		# trl_copy_copy = copy.deepcopy(table_res_lable)
-		# sen_product_num = 1 #每次只计算一个产品
-
-		# # #依次对每一个产品求sens-----------------------------
-		# for num in range(product_num):
-		# 	trl_copy.iloc[-1] = trl_copy_copy.iloc[-(product_num-num)]
-		# 	sens_table_res_lable = get_sens_table_res_lable(file_input, list_stage_head_lable, trl_copy, product_num, delta_x)
-
-		# 	# 求sens列表，sens为灵敏度计算结果矩阵-----------------------------
-		# 	table_mul, table_total, table_result = get_epd(file_input, file_result, sen_product_num, product_name, unit_field)
-
-		# 	sens_raw = copy.deepcopy(table_result)
-		# 	sens = []
-		# 	for tab in sens_table_res_lable:
-		# 		table_mul, table_total, table_result = get_epd(file_input, file_result, sen_product_num, product_name, unit_field)
-		# 		sens.append(senstivity(sens_raw[0], table_result[0], delta_x))
-
-		# 	# sens_result按阶段解析结果-------------------------------------
-		# 	sens_result=[]
-		# 	sen_plot = pd.DataFrame()
-		# 	for row in range(stage_row):
-		# 		# sen_plot = pd.DataFrame()
-		# 		for idx in range(stage_numlist[row],stage_numlist[row+1]):
-		# 			sens_result.append(sens[idx][table_head_stage.columns[stage_numlist[row]]])
-		# 		# for idx, lsh in enumerate(list_stage_head[row]):
-		# 		for idx, lsh in enumerate(list_stage_head_lable[row]):
-		# 			sen_plot[lsh] = sens_result[idx]
-		# 		# sens_plot(sen_plot,table_head_stage.columns[stage_numlist[row]])
-		# 	sens_plot(sen_plot,product_name[num])
-
-
-		workbook = xlrd.open_workbook(file_input)
-		table_head_stage = get_table_head(file_input, 0)
-		table_head_chara = get_table_head(file_input, 1)
-		stage_row, stage_numlist = get_Head_numlist(table_head_stage)
-		chara_row, chara_numlist = get_Head_numlist(table_head_chara)
-		list_stage_head, list_stage_head_lable, list_chara_head, list_chara_head_lable = get_list_head(table_head_stage, table_head_chara, stage_row, stage_numlist, chara_row, chara_numlist)
-		table_res_lable = get_table_res_lable(file_input, list_stage_head_lable)
-		# table_chara_lable = get_table_chara_lable(file_input, list_chara_head_lable)
-		sens_table_res_lable = get_sens_table_res_lable(file_input, list_stage_head_lable, table_res_lable, product_num, delta_x)
-
-		#构建一个最后一行为企业数据input的df，即product_num=1时的table_res_lable----------------
-		trl_copy = copy.deepcopy(table_res_lable)
-		trl_copy.drop(trl_copy.index[range(-1,-product_num,-1)],inplace=True)
-		trl_copy_copy = copy.deepcopy(table_res_lable)
+	def get_sensitivity(self):
+		# 构建一个最后一行为企业数据input的df，即product_num=1时的table_res_lable----------------
+		trl_copy = copy.deepcopy(self.table_res_lable)
+		trl_copy.drop(trl_copy.index[range(-1,-self.product_num,-1)],inplace=True)
+		trl_copy_copy = copy.deepcopy(self.table_res_lable)
 		sen_product_num = 1 #每次只计算一个产品
-
-		# #依次对每一个产品求sens-----------------------------
-		for num in range(product_num):
-			trl_copy.iloc[-1] = trl_copy_copy.iloc[-(product_num-num)]
-			sens_table_res_lable = get_sens_table_res_lable(file_input, list_stage_head_lable, trl_copy, product_num, delta_x)
-
+		# 依次对每一个产品求sens-----------------------------
+		for num in range(self.product_num):
+			trl_copy.iloc[-1] = trl_copy_copy.iloc[-(self.product_num-num)]
+			sens_table_res_lable = self.get_sens_table_res_lable(self.file_input, self.list_stage_head_lable, trl_copy, self.product_num, self.delta_x)
 			# 求sens列表，sens为灵敏度计算结果矩阵-----------------------------
-			# table_mul, table_total, table_result = get_epd(sen_product_num, table_head_stage, table_head_chara, list_stage_head_lable, list_chara_head, list_chara_head_lable, trl_copy, table_chara_lable)
-
-			table_mul, table_total, table_result = get_epd(file_input, file_result, sen_product_num, product_name, unit_field)
-
-			print(table_result)
-			sens_raw = copy.deepcopy(table_result)
+			self.get_epd(sen_product_num, trl_copy)
+			sens_raw = copy.deepcopy(self.table_result)
 			sens = []
 			for tab in sens_table_res_lable:
-				# table_mul, table_total, table_result = get_epd(sen_product_num, table_head_stage, table_head_chara, list_stage_head_lable, list_chara_head, list_chara_head_lable, tab, table_chara_lable)
-
-				table_mul, table_total, table_result = get_epd(file_input, file_result, sen_product_num, product_name, unit_field)
-
-				sens.append(senstivity(sens_raw[0], table_result[0], delta_x))
-
-			# # sens_result按阶段解析结果-------------------------------------
-			# sens_result=[]
-			# sen_plot = pd.DataFrame()
-			# for row in range(stage_row):
-			# 	# sen_plot = pd.DataFrame()
-			# 	for idx in range(stage_numlist[row],stage_numlist[row+1]):
-			# 		sens_result.append(sens[idx][table_head_stage.columns[stage_numlist[row]]])
-			# 	# for idx, lsh in enumerate(list_stage_head[row]):
-			# 	for idx, lsh in enumerate(list_stage_head_lable[row]):
-			# 		sen_plot[lsh] = sens_result[idx]
-			# 	# sens_plot(sen_plot,table_head_stage.columns[stage_numlist[row]])
-			# sens_plot(sen_plot,product_name[num])
+				self.get_epd(sen_product_num, tab)
+				sens.append(self.senstivity(sens_raw[0], self.table_result[0], self.delta_x))
+			# sens_result按阶段解析结果-------------------------------------
+			sens_result=[]
+			sen_plot = pd.DataFrame()
+			for row in range(self.stage_row):
+				for idx in range(self.stage_numlist[row],self.stage_numlist[row+1]):
+					sens_result.append(sens[idx][self.table_head_stage.columns[self.stage_numlist[row]]])
+				for idx, lsh in enumerate(self.list_stage_head_lable[row]):
+					sen_plot[lsh] = sens_result[idx]
+				# sens_plot(sen_plot,self.table_head_stage.columns[self.stage_numlist[row]])
+			self.sens_plot(sen_plot,self.product_name[num])
 
