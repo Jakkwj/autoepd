@@ -1,6 +1,6 @@
 # AutoEPD
 - **AutoEPD** is a package for calculating the Environmental Product Declaration(EPD).
-- **Intalltion**: ``pip install autoepd``
+- **Installtion**: ``pip install autoepd``
 
 # Result Figures
 - Some result figures:
