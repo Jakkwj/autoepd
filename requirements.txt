@@ -6,7 +6,7 @@ matplotlib == 2.0.2
 
 # autoepd/epd.py: 5
 # autoepd/tests/trans.py: 3
-numpy == 1.14.3
+numpy == 1.22.0
 
 # autoepd/epd.py: 4
 # autoepd/tests/creatdb.py: 3
