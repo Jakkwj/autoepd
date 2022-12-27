@@ -20,7 +20,7 @@ psycopg2 == 2.7.1
 seaborn == 0.8
 
 # setup.py: 11
-setuptools == 36.4.0
+setuptools == 65.5.1
 
 # autoepd/epd.py: 7
 # autoepd/tests/creatdb.py: 7
